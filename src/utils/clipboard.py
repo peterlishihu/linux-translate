@@ -48,6 +48,24 @@ class ClipboardManager:
         return False
 
     @classmethod
+    def get_selection(cls) -> str:
+        """Get the current primary selection (highlighted text)."""
+        _, wl_paste = cls._find_commands()
+        if wl_paste:
+            try:
+                result = subprocess.run(
+                    [wl_paste, '--primary', '--no-newline'],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if result.returncode == 0:
+                    return result.stdout
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                pass
+        return ''
+
+    @classmethod
     def is_available(cls) -> bool:
         wl_copy, wl_paste = cls._find_commands()
         return wl_copy is not None and wl_paste is not None
